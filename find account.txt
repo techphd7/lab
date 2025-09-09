@@ -1,0 +1,276 @@
+/*savingaccount.h*/
+
+#ifndef ACCOUNT_H
+#define ACCOUNT_H
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Account {
+protected:
+    int accNo;
+    string name;
+    double balance;
+
+public:
+    Account(int accNo, string name, double balance);
+    virtual void display() const;
+    int getAccNo() const;
+    string getName() const;
+    double getBalance() const;
+    virtual string getType() const = 0; // pure virtual
+    virtual ~Account();
+};
+
+// ---------------- SavingAccount ----------------
+class SavingAccount : public Account {
+    double interestRate;
+
+public:
+    SavingAccount(int accNo, string name, double balance, double rate);
+    void display() const;
+    string getType() const;
+};
+
+// ---------------- CurrentAccount ----------------
+class CurrentAccount : public Account {
+    double minBalance;
+
+public:
+    CurrentAccount(int accNo, string name, double balance, double minBal);
+    void display() const;
+    string getType() const;
+};
+
+#endif
+
+/**************************************
+//Account.cpp//
+
+#include "Account.h"
+#include <iostream>
+using namespace std;
+
+// ---------- Account ----------
+Account::Account(int accNo, string name, double balance)
+    : accNo(accNo), name(name), balance(balance) {}
+
+void Account::display() const {
+    cout << "AccNo: " << accNo << ", Name: " << name
+         << ", Balance: " << balance;
+}
+
+int Account::getAccNo() const { return accNo; }
+string Account::getName() const { return name; }
+double Account::getBalance() const { return balance; }
+
+Account::~Account() {} // virtual destructor
+
+// ---------- SavingAccount ----------
+SavingAccount::SavingAccount(int accNo, string name, double balance, double rate)
+    : Account(accNo, name, balance), interestRate(rate) {}
+
+void SavingAccount::display() const {
+    Account::display();
+    cout << ", InterestRate: " << interestRate << " (Saving)" << endl;
+}
+
+string SavingAccount::getType() const { return "Saving"; }
+
+// ---------- CurrentAccount ----------
+CurrentAccount::CurrentAccount(int accNo, string name, double balance, double minBal)
+    : Account(accNo, name, balance), minBalance(minBal) {}
+
+void CurrentAccount::display() const {
+    Account::display();
+    cout << ", MinBalance: " << minBalance << " (Current)" << endl;
+}
+
+string CurrentAccount::getType() const { return "Current"; }
+
+/******************************************************************
+
+//Accountservice.h
+#ifndef ACCOUNTSERVICE_H
+#define ACCOUNTSERVICE_H
+
+#include "Account.h"
+#include <vector>
+
+class AccountService {
+public:
+    static void addAccount(std::vector<Account*>& accounts);
+    static void displayAll(const std::vector<Account*>& accounts);
+    static void searchByAccNo(const std::vector<Account*>& accounts, int accNo);
+    static void searchByName(const std::vector<Account*>& accounts, const std::string& name);
+    static void sortByBalance(std::vector<Account*>& accounts);
+    static void displaySaving(const std::vector<Account*>& accounts);
+    static void displayCurrent(const std::vector<Account*>& accounts);
+};
+
+#endif
+/***************************************************
+
+//Accountservice.cpp
+
+#include "AccountService.h"
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+// helper function for sorting
+bool compareBalance(Account* a, Account* b) {
+    return a->getBalance() < b->getBalance();
+}
+
+// ---------------- addAccount ----------------
+void AccountService::addAccount(vector<Account*>& accounts) {
+    int type, accNo;
+    string name;
+    double balance;
+
+    cout << "Enter Account No: ";
+    cin >> accNo;
+    cout << "Enter Name: ";
+    cin >> name;
+    cout << "Enter Balance: ";
+    cin >> balance;
+    cout << "1. Saving\n2. Current\nEnter type: ";
+    cin >> type;
+
+    if (type == 1) {
+        double rate;
+        cout << "Enter Interest Rate: ";
+        cin >> rate;
+        accounts.push_back(new SavingAccount(accNo, name, balance, rate));
+    } else {
+        double minBal;
+        cout << "Enter Minimum Balance: ";
+        cin >> minBal;
+        accounts.push_back(new CurrentAccount(accNo, name, balance, minBal));
+    }
+}
+
+// ---------------- displayAll ----------------
+void AccountService::displayAll(const vector<Account*>& accounts) {
+    for (size_t i = 0; i < accounts.size(); i++)
+        accounts[i]->display();
+}
+
+// ---------------- searchByAccNo ----------------
+void AccountService::searchByAccNo(const vector<Account*>& accounts, int accNo) {
+    for (size_t i = 0; i < accounts.size(); i++) {
+        if (accounts[i]->getAccNo() == accNo) {
+            accounts[i]->display();
+            return;
+        }
+    }
+    cout << "Account not found!\n";
+}
+
+// ---------------- searchByName ----------------
+void AccountService::searchByName(const vector<Account*>& accounts, const string& name) {
+    for (size_t i = 0; i < accounts.size(); i++) {
+        if (accounts[i]->getName() == name) {
+            accounts[i]->display();
+            return;
+        }
+    }
+    cout << "Account not found!\n";
+}
+
+// ---------------- sortByBalance ----------------
+void AccountService::sortByBalance(vector<Account*>& accounts) {
+    sort(accounts.begin(), accounts.end(), compareBalance);
+    cout << "Accounts sorted by balance.\n";
+}
+
+// ---------------- displaySaving ----------------
+void AccountService::displaySaving(const vector<Account*>& accounts) {
+    for (size_t i = 0; i < accounts.size(); i++) {
+        if (accounts[i]->getType() == "Saving")
+            accounts[i]->display();
+    }
+}
+
+// ---------------- displayCurrent ----------------
+void AccountService::displayCurrent(const vector<Account*>& accounts) {
+    for (size_t i = 0; i < accounts.size(); i++) {
+        if (accounts[i]->getType() == "Current")
+            accounts[i]->display();
+    }
+}
+/***************************************************
+
+//main.cpp
+
+#include "AccountService.h"
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main() {
+    vector<Account*> accounts;
+    int choice;
+
+    do {
+        cout << "\n--- Account Management ---\n";
+        cout << "1. Add new account\n";
+        cout << "3. Display All Accounts\n";
+        cout << "4. Search by account number\n";
+        cout << "5. Search by Name\n";
+        cout << "6. Sort Accounts by balance\n";
+        cout << "7. Display All Saving Account\n";
+        cout << "8. Display All Current Account\n";
+        cout << "9. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            AccountService::addAccount(accounts);
+            break;
+        case 3:
+            AccountService::displayAll(accounts);
+            break;
+        case 4: {
+            int no;
+            cout << "Enter Account No: ";
+            cin >> no;
+            AccountService::searchByAccNo(accounts, no);
+            break;
+        }
+        case 5: {
+            string nm;
+            cout << "Enter Name: ";
+            cin >> nm;
+            AccountService::searchByName(accounts, nm);
+            break;
+        }
+        case 6:
+            AccountService::sortByBalance(accounts);
+            break;
+        case 7:
+            AccountService::displaySaving(accounts);
+            break;
+        case 8:
+            AccountService::displayCurrent(accounts);
+            break;
+        case 9:
+            cout << "Exiting...\n";
+            break;
+        default:
+            cout << "Invalid choice!\n";
+        }
+    } while (choice != 9);
+
+    // cleanup
+    for (size_t i = 0; i < accounts.size(); i++)
+        delete accounts[i];
+    accounts.clear();
+
+    return 0;
+}
+

@@ -1,0 +1,216 @@
+//student.h
+#ifndef STUDENT_H
+#define STUDENT_H
+
+#include <string>
+#include <iostream>
+using namespace std;
+
+class Student {
+public:
+    int id;
+    string name;
+    string degree;
+    float m1, m2, m3;
+    float percentage;
+
+    Student() {}
+
+    Student(int id, string name, string degree, float m1, float m2, float m3) {
+        this->id = id;
+        this->name = name;
+        this->degree = degree;
+        this->m1 = m1;
+        this->m2 = m2;
+        this->m3 = m3;
+        this->percentage = (m1 + m2 + m3) / 3.0;
+    }
+
+    void display() {
+        cout << "ID: " << id 
+             << ", Name: " << name 
+             << ", Degree: " << degree 
+             << ", Marks: [" << m1 << "," << m2 << "," << m3 << "]"
+             << ", Percentage: " << percentage << endl;
+    }
+};
+
+#endif
+
+/************************************************
+
+//studentservice.h
+
+#ifndef STUDENTSERVICE_H
+#define STUDENTSERVICE_H
+
+#include "student.h"
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <limits>
+using namespace std;
+
+class StudentService {
+public:
+    static vector<Student> students;
+
+    static void addStudent() {
+        int id;
+        string name, degree;
+        float m1, m2, m3;
+
+        cout << "Enter ID: ";
+        cin >> id;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+
+        cout << "Enter Name: ";
+        getline(cin, name);
+
+        cout << "Enter Degree (MSC/PHD): ";
+        getline(cin, degree);
+
+        cout << "Enter marks m1, m2, m3: ";
+        cin >> m1 >> m2 >> m3;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        students.push_back(Student(id, name, degree, m1, m2, m3));
+        cout << "Student added successfully!\n";
+    }
+
+    static void displayAllStudents() {
+        if (students.empty()) {
+            cout << "No students available.\n";
+            return;
+        }
+        for (size_t i = 0; i < students.size(); ++i)
+            students[i].display();
+    }
+
+    static void searchById() {
+        int id;
+        cout << "Enter ID to search: ";
+        cin >> id;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+
+        bool found = false;
+        for (size_t i = 0; i < students.size(); ++i) {
+            if (students[i].id == id) {
+                students[i].display();
+                found = true;
+            }
+        }
+        if (!found)
+            cout << "Student with ID " << id << " not found.\n";
+    }
+
+    static void searchByName() {
+        string name;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+        getline(cin, name);
+
+        bool found = false;
+        for (size_t i = 0; i < students.size(); ++i) {
+            if (students[i].name == name) {
+                students[i].display();
+                found = true;
+            }
+        }
+        if (!found)
+            cout << "Student with Name \"" << name << "\" not found.\n";
+    }
+
+    static void sortByM1Marks() {
+        sort(students.begin(), students.end(), CompareM1);
+        cout << "Students sorted by m1 marks!\n";
+    }
+
+    static void displayMSCStudents() {
+        bool found = false;
+        for (size_t i = 0; i < students.size(); ++i) {
+            if (students[i].degree == "MSC" || students[i].degree == "msc") {
+                students[i].display();
+                found = true;
+            }
+        }
+        if (!found)
+            cout << "No MSC students found.\n";
+    }
+
+    static void displayPHDStudents() {
+        bool found = false;
+        for (size_t i = 0; i < students.size(); ++i) {
+            if (students[i].degree == "PHD" || students[i].degree == "phd") {
+                students[i].display();
+                found = true;
+            }
+        }
+        if (!found)
+            cout << "No PHD students found.\n";
+    }
+
+private:
+    static bool CompareM1(const Student &a, const Student &b) {
+        return a.m1 > b.m1;
+    }
+};
+vector<Student> StudentService::students;
+
+#endif
+
+/**********************************************
+
+//teststudent.cpp
+
+#include <iostream>
+#include "StudentService.h"
+using namespace std;
+
+int main() {
+    int choice;
+    do {
+        cout << "\n--- Student Management ---\n";
+        cout << "1. Add new Student\n";
+        cout << "3. Display All Student\n";
+        cout << "4. Search by Id\n";
+        cout << "5. Search by Name\n";
+        cout << "6. Sort Students by m1 marks\n";
+        cout << "7. Display All MSC Student\n";
+        cout << "8. Display All PHD Student\n";
+        cout << "9. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch(choice) {
+            case 1:
+                StudentService::addStudent();
+                break;
+            case 3:
+                StudentService::displayAllStudents();
+                break;
+            case 4:
+                StudentService::searchById();
+                break;
+            case 5:
+                StudentService::searchByName();
+                break;
+            case 6:
+                StudentService::sortByM1Marks();
+                break;
+            case 7:
+                StudentService::displayMSCStudents();
+                break;
+            case 8:
+                StudentService::displayPHDStudents();
+                break;
+            case 9:
+                cout << "Exiting program.\n";
+                break;
+            default:
+                cout << "Invalid choice! Try again.\n";
+        }
+    } while(choice != 9);
+
+    return 0;
+}
+

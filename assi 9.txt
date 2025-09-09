@@ -1,0 +1,227 @@
+//assi 9
+//Address.h
+#ifndef ADDRESS_H
+#define ADDRESS_H
+
+class Address {
+public:
+    char street[50];
+    char city[50];
+    char state[50];
+    int pin;
+
+    Address();               // Constructor
+    void input();            // Input details
+    void display();          // Display address
+};
+
+#endif
+
+/*********////////////////
+//Address.cpp
+#include <cstring>
+#include "Address.h"
+#include <iostream>
+using namespace std;
+
+Address::Address() {
+    strcpy(street, "");
+    strcpy(city, "");
+    strcpy(state, "");
+    pin = 0;
+}
+
+void Address::input() {
+    cout << "Enter Street: ";
+    cin.ignore();
+    cin.getline(street, 50);
+    cout << "Enter City: ";
+    cin.getline(city, 50);
+    cout << "Enter State: ";
+    cin.getline(state, 50);
+    cout << "Enter Pin: ";
+    cin >> pin;
+}
+
+void Address::display() {
+    cout << street << ", " << city << ", " << state << " - " << pin;
+}
+
+/************************************
+//Person.h
+
+#ifndef PERSON_H
+#define PERSON_H
+
+#include "Address.h"
+#include <iostream>
+using namespace std;
+
+class Person {
+private:
+    static int count;  // for auto id
+public:
+    int id;
+    char name[50];
+    Address addr;
+
+    Person();             // Constructor
+    void input();         // Input Person details
+    void display();       // Display Person details
+};
+
+#endif
+/****************************/
+//person.cpp
+
+#include <iostream>
+#include <cstring>
+#include "Person.h"
+using namespace std;
+
+int Person::count = 0;   // Initialize static count
+
+Person::Person() {
+    id = ++count;
+    strcpy(name, "");
+}
+
+void Person::input() {
+    cout << "Enter Name: ";
+    cin.ignore();
+    cin.getline(name, 50);
+    cout << "Enter Address Details:\n";
+    addr.input();
+}
+
+void Person::display() {
+    cout << "ID: " << id << ", Name: " << name << ", Address: ";
+    addr.display();
+    cout << endl;
+}
+/*************************************/
+main.cpp
+#include <iostream>
+#include <cstring>
+#include "Person.h"
+using namespace std;
+
+int main() {
+    Person* persons[100];
+    int n = 0;
+    int choice;
+
+    do {
+        cout << "\n1. Add New Person\n2. Display All Person\n3. Search by ID\n4. Search by Name\n5. Modify Address\n6. Find Address by ID\n7. Display All Person in City\n8. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                persons[n] = new Person();
+                persons[n]->input();
+                n++;
+                break;
+
+            case 2:
+                for(int i=0; i<n; i++)
+                    persons[i]->display();
+                break;
+
+            case 3: {
+                int id;
+                cout << "Enter ID to search: ";
+                cin >> id;
+                bool found = false;
+                for(int i=0; i<n; i++){
+                    if(persons[i]->id == id){
+                        persons[i]->display();
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) cout << "Person not found!\n";
+                break;
+            }
+
+            case 4: {
+                char name[50];
+                cout << "Enter Name to search: ";
+                cin.ignore();
+                cin.getline(name, 50);
+                bool found = false;
+                for(int i=0; i<n; i++){
+                    if(strcmp(persons[i]->name, name) == 0){
+                        persons[i]->display();
+                        found = true;
+                    }
+                }
+                if(!found) cout << "Person not found!\n";
+                break;
+            }
+
+            case 5: {
+                int id;
+                cout << "Enter ID to modify address: ";
+                cin >> id;
+                bool found = false;
+                for(int i=0; i<n; i++){
+                    if(persons[i]->id == id){
+                        cout << "Enter New Address:\n";
+                        persons[i]->addr.input();
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) cout << "Person not found!\n";
+                break;
+            }
+
+            case 6: {
+                int id;
+                cout << "Enter ID to find address: ";
+                cin >> id;
+                bool found = false;
+                for(int i=0; i<n; i++){
+                    if(persons[i]->id == id){
+                        cout << "Address: ";
+                        persons[i]->addr.display();
+                        cout << endl;
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) cout << "Person not found!\n";
+                break;
+            }
+
+            case 7: {
+                char city[50];
+                cout << "Enter city: ";
+                cin.ignore();
+                cin.getline(city, 50);
+                bool found = false;
+                for(int i=0; i<n; i++){
+                    if(strcmp(persons[i]->addr.city, city) == 0){
+                        persons[i]->display();
+                        found = true;
+                    }
+                }
+                if(!found) cout << "No person found in given city!\n";
+                break;
+            }
+
+            case 8:
+                cout << "Exiting...\n";
+                break;
+
+            default:
+                cout << "Invalid choice!\n";
+        }
+    } while(choice != 8);
+
+    for(int i=0; i<n; i++)
+        delete persons[i];
+
+    return 0;
+}

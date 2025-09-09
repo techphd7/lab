@@ -1,0 +1,166 @@
+/*myobject.h */
+#ifndef MYOBJECT_H
+#define MYOBJECT_H
+#include <iostream>
+using namespace std;
+
+class MyObject {
+public:
+    int id;
+    char name[50];
+    char extra[100]; // Could be address, degree, etc.
+
+    void getData();   // Input data
+    void showData();  // Display data
+};
+
+#endif
+
+
+//myobject.cpp
+#include "MyObject.h"
+#include <iostream>
+using namespace std;
+
+void MyObject::getData() {
+    cout << "Enter ID: ";
+    cin >> id;
+    cin.ignore(); // Ignore newline
+    cout << "Enter Name: ";
+    cin.getline(name, 50);
+    cout << "Enter Extra Info: ";
+    cin.getline(extra, 100);
+}
+
+void MyObject::showData() {
+    cout << "ID: " << id << ", Name: " << name << ", Extra: " << extra << endl;
+}
+
+
+//genericserive.h
+#ifndef GENERICSERVICE_H
+#define GENERICSERVICE_H
+#include "MyObject.h"
+#include <cstring> // For strcmp
+
+class GenericService {
+public:
+    static MyObject arr[100];
+    static int count;
+
+    static void addObject();
+    static void displayAll();
+    static void searchById();
+    static void searchByName();
+    static void sortById();
+    static void sortByName();
+    static void modifyExtraById();
+};
+
+#endif
+
+//genericservice.cpp
+#include "GenericService.h"
+#include <iostream>
+using namespace std;
+
+// Initialize static members
+MyObject GenericService::arr[100];
+int GenericService::count = 0;
+
+void GenericService::addObject() {
+    if(count >= 100) { cout << "Array full.\n"; return; }
+    arr[count].getData();
+    count++;
+}
+
+void GenericService::displayAll() {
+    if(count == 0) { cout << "No objects to display.\n"; return; }
+    for(int i=0;i<count;i++) arr[i].showData();
+}
+
+void GenericService::searchById() {
+    int id;
+    cout << "Enter ID: ";
+    cin >> id;
+    for(int i=0;i<count;i++)
+        if(arr[i].id==id) { arr[i].showData(); return; }
+    cout << "Not found.\n";
+}
+
+void GenericService::searchByName() {
+    char name[50];
+    cin.ignore();
+    cout << "Enter Name: ";
+    cin.getline(name, 50);
+    for(int i=0;i<count;i++)
+        if(strcmp(arr[i].name,name)==0) { arr[i].showData(); return; }
+    cout << "Not found.\n";
+}
+
+void GenericService::sortById() {
+    for(int i=0;i<count-1;i++)
+        for(int j=i+1;j<count;j++)
+            if(arr[i].id>arr[j].id) swap(arr[i],arr[j]);
+    cout << "Sorted by ID.\n";
+}
+
+void GenericService::sortByName() {
+    for(int i=0;i<count-1;i++)
+        for(int j=i+1;j<count;j++)
+            if(strcmp(arr[i].name,arr[j].name)>0) swap(arr[i],arr[j]);
+    cout << "Sorted by Name.\n";
+}
+
+void GenericService::modifyExtraById() {
+    int id;
+    cin.ignore();
+    cout << "Enter ID to modify extra info: ";
+    cin >> id;
+    cin.ignore();
+    for(int i=0;i<count;i++)
+        if(arr[i].id==id) {
+            cout << "Enter new extra info: ";
+            cin.getline(arr[i].extra,100);
+            cout << "Updated.\n";
+            return;
+        }
+    cout << "Not found.\n";
+}
+
+//main.cpp
+#include <iostream>
+#include "GenericService.h"
+using namespace std;
+
+int main() {
+    int choice;
+    do {
+        cout << "\nMenu:\n";
+        cout << "1. Add Object\n";
+        cout << "2. Search by ID\n";
+        cout << "3. Display All\n";
+        cout << "4. Search by Name\n";
+        cout << "5. Sort by ID\n";
+        cout << "6. Sort by Name\n";
+        cout << "7. Modify Extra by ID\n";
+        cout << "8. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch(choice) {
+            case 1: GenericService::addObject(); break;
+            case 2: GenericService::searchById(); break;
+            case 3: GenericService::displayAll(); break;
+            case 4: GenericService::searchByName(); break;
+            case 5: GenericService::sortById(); break;
+            case 6: GenericService::sortByName(); break;
+            case 7: GenericService::modifyExtraById(); break;
+            case 8: cout << "Exiting...\n"; break;
+            default: cout << "Invalid choice.\n";
+        }
+    } while(choice != 8);
+
+    return 0;
+}
+
